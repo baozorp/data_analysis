@@ -1,0 +1,5 @@
+{
+    "api_url": "https://api.vk.ru/method/friends.get",
+    "group_list_path": "group_list.json",
+    "group_tree_path": "group_tree.json"
+}
