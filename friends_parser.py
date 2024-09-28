@@ -9,14 +9,15 @@ from typing import List, Dict
 class JSONReader:
 
     @staticmethod
-    def read_group_list_from_file(group_list_path: str):
-        if not os.path.exists(group_list_path):
-            return []
-        with open(group_list_path, "r") as group_list_file:
-            group_list = json.load(group_list_file)
-        if not group_list:
-            print("Пустой group_list")
-            return []
+    def read_group_list_from_file(group_dict_path: str) -> List[str]:
+        group_list: List[str] = []
+        if not os.path.exists(group_dict_path):
+            return group_list
+        with open(group_dict_path, "r") as group_list_file:
+            group_dict = json.load(group_list_file)
+            if isinstance(group_dict, dict):
+                for person_id in group_dict:
+                    group_list.append(str(person_id))
         return group_list
 
 class FriendsParser:
@@ -39,8 +40,6 @@ class FriendsParser:
             for friend_id_groupmate in group_tree[groupmate_id]:
                 list_of_friend_of_friends = self.__get_list_of_friends(user_id=friend_id_groupmate)
                 group_tree[groupmate_id][friend_id_groupmate] = list_of_friend_of_friends
-            #     time.sleep(random.uniform(0.4, 0.5))
-            # time.sleep(random.uniform(10, 15))
         return group_tree
 
     def __get_list_of_friends(self, user_id: str) -> List[str]:
@@ -59,27 +58,26 @@ class FriendsParser:
 if __name__=="__main__":
     load_dotenv()
 
-    info_path = "info.json"
-    if not os.path.exists(info_path):
-        print("Ошибка. В директории отсутствует info файл")
-        exit()
-
     api_key =  os.getenv("API_KEY")
     if not api_key:
         print("Отсутствует ключ токена в environment")
         exit()
-
+        
+    info_path = "info.json"
+    if not os.path.exists(info_path):
+        print("Ошибка. В директории отсутствует info файл")
+        exit()
     with open(info_path, "r") as info_file:
         info_dict = json.load(info_file)
-    if "group_list_path" not in info_dict or "group_tree_path" not in info_dict: 
-        print("В info файле нет параметра пути к group_list_path или group_tree_path")
+    if "group_dict_path" not in info_dict or "group_tree_path" not in info_dict: 
+        print("В info файле нет параметра пути к group_dict_path или group_tree_path")
         exit()
 
-    group_list_path = str(info_dict["group_list_path"])
+    group_dict_path = str(info_dict["group_dict_path"])
     group_tree_path = str(info_dict["group_tree_path"])
     api_url = str(info_dict["api_url"])
     friendParser = FriendsParser(api_url=api_url, api_key=api_key)
-    group_ids = JSONReader.read_group_list_from_file(group_list_path=group_list_path)
+    group_ids = JSONReader.read_group_list_from_file(group_dict_path=group_dict_path)
     group_tree = friendParser.get_tree_friends(group_ids=group_ids)
     with open(group_tree_path, "w") as group_tree_file:
         json.dump(group_tree, group_tree_file)

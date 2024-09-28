@@ -1,5 +1,24 @@
 {
     "api_url": "https://api.vk.ru/method/friends.get",
-    "group_list_path": "group_list.json",
-    "group_tree_path": "group_tree.json"
+    "group_dict_path": "group_dict.json",
+    "group_tree_path": "group_tree.json",
+    "options": {
+        "physics": {
+            "enabled": true,
+            "stabilization": {
+                "enabled": true,
+                "iterations": 24
+            },
+            "solver": "forceAtlas2Based",
+            "forceAtlas2Based": {
+                "gravitationalConstant": -10,
+                "centralGravity": 0.005,
+                "springLength": 100,
+                "springConstant": 0.08,
+                "damping": 0.4
+            },
+            "timestep": 0.5,
+            "adaptiveTimestep": true
+        }
+    }
 }
