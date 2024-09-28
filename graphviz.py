@@ -101,7 +101,10 @@ if __name__=="__main__":
     friends_tree: Dict = graphHandler.load_tree_from_file(path=group_tree_path)
     edges_list = graphHandler.get_array_of_edges(prev_value="", tree=friends_tree, names_dict=names_dict)
     trimmed_list = graphHandler.trim_graph(edges_list=edges_list)
+    GFull = Graph()
+    GFull.add_edges(edges_list=edges_list)
+    GFull.visualise("graph.html", options=options)
     G = Graph()
     G.add_edges(edges_list=trimmed_list)
-    G.visualise("graph1.html", options=options)
+    G.visualise("graph_trimmed.html", options=options)
     
