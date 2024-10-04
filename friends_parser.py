@@ -1,8 +1,6 @@
 import requests
 from dotenv import load_dotenv
 import os
-import time
-import random
 import json
 from typing import List, Dict
 
@@ -33,14 +31,16 @@ class FriendsParser:
     
     def get_tree_friends(self, group_ids: list):
         group_tree: Dict[str, Dict[str, List[str]]] = {groupmate_id: {} for groupmate_id in group_ids}
+        group_tree_clone: Dict[str, Dict[str, List[str]]] = {groupmate_id: {} for groupmate_id in group_ids}
         for groupmate_id in group_tree:
             print(groupmate_id)
             list_of_friends = self.__get_list_of_friends(user_id=groupmate_id)
-            group_tree[groupmate_id] = {friend_id_groupmate: [] for friend_id_groupmate in list_of_friends}   
+            group_tree[groupmate_id] = {friend_id_groupmate: [] for friend_id_groupmate in list_of_friends}
             for friend_id_groupmate in group_tree[groupmate_id]:
                 list_of_friend_of_friends = self.__get_list_of_friends(user_id=friend_id_groupmate)
-                group_tree[groupmate_id][friend_id_groupmate] = list_of_friend_of_friends
-        return group_tree
+                if list_of_friend_of_friends:
+                    group_tree_clone[groupmate_id][friend_id_groupmate] = list_of_friend_of_friends
+        return group_tree_clone
 
     def __get_list_of_friends(self, user_id: str) -> List[str]:
         self.body_request_template["user_id"] = user_id
@@ -51,7 +51,7 @@ class FriendsParser:
             return []
         if response.status_code != 200 or "response" not in json_response or "items" not in json_response["response"]:
             return []
-        list_of_friend_groupmate = json_response["response"]["items"][:100]
+        list_of_friend_groupmate = json_response["response"]["items"][:1000]
         str_list_of_friend_groupmate = list(map(str, list_of_friend_groupmate))
         return str_list_of_friend_groupmate
 
@@ -63,7 +63,7 @@ if __name__=="__main__":
         print("Отсутствует ключ токена в environment")
         exit()
         
-    info_path = "info.json"
+    info_path = "./helpers_files/info.json"
     if not os.path.exists(info_path):
         print("Ошибка. В директории отсутствует info файл")
         exit()
