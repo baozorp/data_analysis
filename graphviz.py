@@ -1,7 +1,7 @@
 from pyvis.network import Network
 import networkx as nx
 import json
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Set
 import os
 
 class GraphHandler:
@@ -49,19 +49,25 @@ class GraphHandler:
                         result_array.append((names_dict[key], element, {"color": self.edges_colors[level if level < 2 else -1]}))
         return result_array
     
-
+    edges_list = [(1, 2, {"color": "green"}), (2, 3, {"color": "green"}), (3, 4, {"color": "green"})]
     def trim_graph(self, edges_list: List[Tuple[str, str, Dict[str, str]]]):
-        passed_notes: Dict[str, int] = {}
-        trimmed_list = []
+        edges_dict: Dict[str, Set[str]] = {}
         for i in edges_list:
-            if i[0] in passed_notes:
-                if passed_notes[i[0]] < 30:
-                    trimmed_list.append(i)
-                    passed_notes[i[0]] += 1
+            if i[2] != {"color": "green"}:
+                continue
+            if i[1] in edges_dict:
+                edges_dict[i[1]].add(i[0])
             else:
+                edges_dict[i[1]] = set()
+        trimmed_list: List[Tuple[str, str, Dict[str, str]]] = []
+        for i in edges_list:
+            if i[2] == {"color": "red"}:
                 trimmed_list.append(i)
-                passed_notes[i[0]] = 1
+                continue
+            if len(edges_dict[i[1]]) > 1:
+                trimmed_list.append(i)
         return trimmed_list
+    
 class Graph():
 
     def __init__(self) -> None:
@@ -83,7 +89,7 @@ class Graph():
 
 
 if __name__=="__main__":
-    info_path = "info.json"
+    info_path = "./helpers_files/info.json"
     if not os.path.exists(info_path):
         print("Ошибка. В директории отсутствует info файл")
         exit()
@@ -102,9 +108,5 @@ if __name__=="__main__":
     edges_list = graphHandler.get_array_of_edges(prev_value="", tree=friends_tree, names_dict=names_dict)
     trimmed_list = graphHandler.trim_graph(edges_list=edges_list)
     GFull = Graph()
-    GFull.add_edges(edges_list=edges_list)
-    GFull.visualise("graph.html", options=options)
-    G = Graph()
-    G.add_edges(edges_list=trimmed_list)
-    G.visualise("graph_trimmed.html", options=options)
-    
+    GFull.add_edges(edges_list=trimmed_list)
+    GFull.visualise("./graph_html/graph_trimmed.html", options=options)
