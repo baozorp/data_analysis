@@ -1,7 +1,7 @@
 from pyvis.network import Network
 import networkx as nx
 import json
-from typing import Tuple, List, Dict, Set
+from typing import Tuple, List, Dict, Set, Mapping
 import os
 
 class GraphHandler:
@@ -86,7 +86,31 @@ class Graph():
         net.from_nx(self.G)
         net.show(save_path, notebook=False)
 
+    def handle_and_write_to_file(self, centrality: Mapping, sorted_by_what: str):
+        list_of_group_centrality: List[Tuple[str, str, float]] =  []
+        for node, centrality in centrality.items():
+            if node in names_dict:
+                list_of_group_centrality.append((node, names_dict[node], centrality))
+        list_of_group_centrality.sort(key=lambda x: x[2], reverse=True)
+        if not os.path.exists("./result_files"):
+            os.mkdir("./result_files")
+        with open(f"./result_files/Список центральности по {sorted_by_what}.txt", "w") as file:
+            file.write(f"Отсортированный список по {sorted_by_what}:\n")
+            for entry in list_of_group_centrality:
+                file.write(f"{entry[0]}, {entry[1]}, {entry[2]}\n")
+        print(f"Список центральности по {sorted_by_what} успешно сохранён в файл centrality_output.txt")
 
+    def closeness_centrality(self):
+        closeness_centrality = nx.closeness_centrality(self.G)
+        self.handle_and_write_to_file(centrality=closeness_centrality, sorted_by_what="близости")
+
+    def betweenness_centrality(self):
+        betweenness_centrality = nx.betweenness_centrality(self.G)
+        self.handle_and_write_to_file(centrality=betweenness_centrality, sorted_by_what="посредничеству")
+
+    def eigenvector_centrality(self):
+        eigenvector_centrality = nx.eigenvector_centrality(self.G)
+        self.handle_and_write_to_file(centrality=eigenvector_centrality, sorted_by_what="собственному вектору")
 
 if __name__=="__main__":
     info_path = "./helpers_files/info.json"
@@ -109,4 +133,8 @@ if __name__=="__main__":
     trimmed_list = graphHandler.trim_graph(edges_list=edges_list)
     GFull = Graph()
     GFull.add_edges(edges_list=trimmed_list)
-    GFull.visualise("./graph_html/graph_trimmed.html", options=options)
+    GFull.closeness_centrality()
+    # GFull.visualise("./graph_html/graph_trimmed.html", options=options)
+    GFull.betweenness_centrality()
+    GFull.closeness_centrality()
+    GFull.eigenvector_centrality()
