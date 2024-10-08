@@ -125,4 +125,4 @@ if __name__=="__main__":
     GFull.get_centrality(nx.closeness_centrality, "близости")
     GFull.get_centrality(nx.betweenness_centrality, "посредничеству")
     GFull.get_centrality(nx.eigenvector_centrality, "собственному вектору")
-    # GFull.visualise("./graph_html/graph_trimmed.html", options=options)
+    GFull.visualise("./graph_html/graph_trimmed.html", options=options)
